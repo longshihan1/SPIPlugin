@@ -6,6 +6,11 @@ import com.android.build.gradle.internal.pipeline.TransformManager.SCOPE_FULL_PR
 import com.android.utils.FileUtils
 import org.apache.commons.codec.digest.DigestUtils
 import org.gradle.api.Project
+import org.objectweb.asm.ClassReader
+import org.objectweb.asm.ClassReader.EXPAND_FRAMES
+import org.objectweb.asm.ClassWriter
+import java.io.File
+import java.io.FileOutputStream
 import java.io.IOException
 
 /**
@@ -34,11 +39,8 @@ open class LTransform(val project: Project): Transform(){
     }
 
     @Throws(IOException::class,TransformException::class,InterruptedException::class)
-    override fun transform(
-        context: Context?,
-        inputs: MutableCollection<TransformInput>?,
-        referencedInputs: MutableCollection<TransformInput>?,
-        outputProvider: TransformOutputProvider?,
+    override fun transform(context: Context?, inputs: MutableCollection<TransformInput>?,
+        referencedInputs: MutableCollection<TransformInput>?, outputProvider: TransformOutputProvider?,
         isIncremental: Boolean)  {
         print( "//===============asm visit start===============//")
         var startTime = System.currentTimeMillis()
@@ -46,11 +48,21 @@ open class LTransform(val project: Project): Transform(){
             input.directoryInputs.stream().forEach {directoryInput ->
                 //坐等遍历class并被ASM操作
                 if (directoryInput.file.isDirectory){
-                    directoryInput.file.listFiles()?.forEach {file ->
+                    var filees=directoryInput.file.walk()
+                    filees.forEach {file ->
                         val name=file.name
                         if (name.endsWith(".class") && !name.startsWith("R\$") &&
                             "R.class" != name && "BuildConfig.class" != name) {
-
+                            println(name+":is changeing ,,,,")
+                            var cr= ClassReader(file.readBytes())
+                            var cw= ClassWriter(ClassWriter.COMPUTE_MAXS)
+                            var cv=CostClassVisitor(cw)
+                            cr.accept(cv,EXPAND_FRAMES)
+                            var code=cw.toByteArray()
+                            println(file.parentFile.absolutePath+File.separator+name+"is save")
+                            var fos=FileOutputStream(file.parentFile.absolutePath+File.separator+name)
+                            fos.write(code)
+                            fos.close()
                         }
                     }
                 }
