@@ -11,7 +11,7 @@ sourceSets {
             srcDirs += ['src/main/kotlin', 'src/main/java']
         }
         resources {
-            srcDirs+=['src/resources']
+            srcDirs += ['src/resources']
         }
     }
     test {
@@ -34,7 +34,6 @@ compileTestKotlin {
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
-    kapt 'com.google.auto.service:auto-service:1.0-rc6'
     api gradleApi()
     compileOnly 'com.android.tools.build:gradle:4.0.0'
     testCompileOnly 'com.android.tools.build:gradle:4.0.0'
@@ -42,6 +41,7 @@ dependencies {
     implementation "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version"
     testImplementation "org.jetbrains.kotlin:kotlin-test:$kotlin_version"
     testImplementation "org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version"
+    implementation 'com.github.longshihan1:spi_api:2.0.0'
 }
 
 repositories {
@@ -50,11 +50,11 @@ repositories {
 }
 
 
-uploadArchives{ //当前项目可以发布到本地文件夹中
+uploadArchives { //当前项目可以发布到本地文件夹中
     repositories {
         mavenDeployer {
             pom.groupId = "com.longshihan.Lplugin"
-            pom.version = "1.0.6"
+            pom.version = "1.0.8"
             repository(url: uri('../repo')) //定义本地maven仓库的地址
         }
     }

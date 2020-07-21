@@ -1,2 +1,4 @@
-include ':app', ':LPlugin', ':asm-interface'
+//include ':java-module'
+include ':app', ':LPlugin'
+//include ':asm-interface'
 rootProject.name='SPIPlugin'

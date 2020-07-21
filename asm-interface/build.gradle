@@ -1,8 +1,11 @@
-apply plugin: 'java-library'
-
-dependencies {
-    implementation fileTree(dir: 'libs', include: ['*.jar'])
+apply from:'../LTransform.gradle'
+apply plugin: 'maven'
+uploadArchives { //当前项目可以发布到本地文件夹中
+    repositories {
+        mavenDeployer {
+            pom.groupId = "com.longshihan.spi-api"
+            pom.version = "1.0.0"
+            repository(url: uri('../repo')) //定义本地maven仓库的地址
+        }
+    }
 }
-
-sourceCompatibility = "7"
-targetCompatibility = "7"

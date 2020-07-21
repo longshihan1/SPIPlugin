@@ -6,6 +6,12 @@
   <version>1.0.6</version>
   <dependencies>
     <dependency>
+      <groupId>SPIPlugin</groupId>
+      <artifactId>asm-interface</artifactId>
+      <version>unspecified</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
       <groupId>org.jetbrains.kotlin</groupId>
       <artifactId>kotlin-stdlib</artifactId>
       <version>1.3.50</version>
