@@ -4,6 +4,7 @@ import com.android.build.api.transform.*
 import com.android.build.gradle.internal.pipeline.TransformManager
 import com.android.build.gradle.internal.pipeline.TransformManager.SCOPE_FULL_PROJECT
 import com.android.utils.FileUtils
+import com.longshihan.lplugin.config.LConfig
 import com.longshihan.lplugin.utils.loadTransformers
 import com.longshihan.spi_api.LTransformListener
 import org.apache.commons.codec.digest.DigestUtils
@@ -24,7 +25,6 @@ import java.util.*
 open class LTransform(val project: Project) : Transform() {
     private var TAG: String = "LTransform"
 
-    val transformers= mutableListOf<LTransformListener>()
 //
 //    val transformers=loadTransformers(project.buildscript.classLoader)
     override fun getName(): String {
@@ -47,9 +47,6 @@ open class LTransform(val project: Project) : Transform() {
         super.transform(transformInvocation)
         try {
             println("===== ASM Transform =====")
-            transformers.addAll(loadTransformers(this.javaClass.classLoader))
-
-            println("===== ASM Transform ====="+transformers.size)
             println("${transformInvocation?.inputs}")
             println("${transformInvocation?.referencedInputs}")
             println("${transformInvocation?.outputProvider}")
@@ -73,25 +70,32 @@ open class LTransform(val project: Project) : Transform() {
                     FileUtils.copyFile(jarInput.file, dest)
                 }
                 input.directoryInputs.stream().forEach { directoryInput ->
+                    val fileCPath=directoryInput.file.absolutePath
                     if (directoryInput.file.isDirectory) {
                         if (directoryInput.file.name != "META-INF") {
                             directoryInput.file.walk().forEach { file ->
                                 val name = file.name
-                                if (name.endsWith(".class") && !name.startsWith("R\$") &&
-                                    "R.class" != name && "BuildConfig.class" != name) {
+                                val dpath=file.absolutePath
+                                val currentPath=dpath.replace(fileCPath,"")
+                                    .replace("/",".")
+                                    .replaceFirst(".","")
+                                println("---------$dpath")
+                                var isReplce=false
+                                for (configStr in LConfig.excludes){
+                                    if (currentPath.startsWith(configStr)){
+                                        isReplce=true
+                                        break
+                                    }
+                                }
+                                if (!isReplce &&name.endsWith(".class") && !name.startsWith("R\$")
+                                    && "R.class" != name && "BuildConfig.class" != name) {
                                     try {
-                                        println(file.absolutePath + ":is changeing ,,,,")
-                                        if (!transformers.isNullOrEmpty()){
-                                            transformers.forEach{transform:LTransformListener->
-                                                transform.transform(file.readBytes())
-                                            }
-                                        }
+                                        println("$currentPath:is changeing ,,,,")
                                         val cr = ClassReader(file.readBytes())
                                         val cw = ClassWriter(cr,ClassWriter.COMPUTE_MAXS)
-                                        val cv = TestMethodClassAdapter(cw)
+                                        val cv = TestMethodClassAdapter(currentPath,cw)
                                         cr.accept(cv, EXPAND_FRAMES)
                                         val code = cw.toByteArray()
-                                        println(file.parentFile.absolutePath + File.separator + name + "is save"+code.size)
                                         val fos =
                                             FileOutputStream(file.parentFile.absolutePath + File.separator + name)
                                         fos.write(code)
