@@ -15,7 +15,7 @@ fun Project.compatCompile(depLib: Any) {
 
 class ArgusDependencyResolutionListener(val project: Project):DependencyResolutionListener{
     override fun beforeResolve(p0: ResolvableDependencies) {
-        project.compatCompile("com.github.longshihan1:DataCollect:0.01")
+        project.compatCompile("com.github.longshihan1:DataCollect:0.03")
         project.gradle.removeListener(this)
     }
 
