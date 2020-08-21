@@ -27,7 +27,10 @@ android {
         targetCompatibility JavaVersion.VERSION_1_8
     }
 }
-
+lConfig{
+    version="0.6"
+    enable=true
+}
 
 repositories {
     mavenLocal()
@@ -46,7 +49,7 @@ dependencies {
 //    implementation project(':java-module')
     annotationProcessor 'com.google.auto.service:auto-service:1.0-rc6'
     implementation 'com.google.auto.service:auto-service:1.0-rc6'
-    implementation 'com.github.longshihan1:spi_api:2.0.0'
+//    implementation 'com.github.longshihan1:spi_api:2.0.0'
     implementation 'com.github.longshihan1:DataCollect:0.04'
 //    implementation "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version"
 }

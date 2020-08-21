@@ -5,6 +5,7 @@ import com.android.build.gradle.internal.pipeline.TransformManager
 import com.android.build.gradle.internal.pipeline.TransformManager.SCOPE_FULL_PROJECT
 import com.android.utils.FileUtils
 import com.longshihan.lplugin.config.LConfig
+import com.longshihan.lplugin.utils.Config
 import com.longshihan.lplugin.utils.loadTransformers
 import com.longshihan.spi_api.LTransformListener
 import org.apache.commons.codec.digest.DigestUtils
@@ -25,8 +26,6 @@ import java.util.*
 open class LTransform(val project: Project) : Transform() {
     private var TAG: String = "LTransform"
 
-//
-//    val transformers=loadTransformers(project.buildscript.classLoader)
     override fun getName(): String {
         return TAG
     }
@@ -45,6 +44,11 @@ open class LTransform(val project: Project) : Transform() {
 
     override fun transform(transformInvocation: TransformInvocation?) {
         super.transform(transformInvocation)
+        if (!Config.enable){
+            println("时间插桩插件关闭")
+        }else{
+            println("时间插桩插件开启")
+        }
         try {
             println("===== ASM Transform =====")
             println("${transformInvocation?.inputs}")
