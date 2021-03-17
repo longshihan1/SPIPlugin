@@ -56,5 +56,25 @@
       <option name="name" value="maven3" />
       <option name="url" value="file:$PROJECT_DIR$/LPlugin/repo" />
     </remote-repository>
+    <remote-repository>
+      <option name="id" value="maven3" />
+      <option name="name" value="maven3" />
+      <option name="url" value="file:/$PROJECT_DIR$/repo/" />
+    </remote-repository>
+    <remote-repository>
+      <option name="id" value="MavenLocal" />
+      <option name="name" value="MavenLocal" />
+      <option name="url" value="file:/$MAVEN_REPOSITORY$/" />
+    </remote-repository>
+    <remote-repository>
+      <option name="id" value="maven3" />
+      <option name="name" value="maven3" />
+      <option name="url" value="file:/$PROJECT_DIR$/app/repo" />
+    </remote-repository>
+    <remote-repository>
+      <option name="id" value="maven3" />
+      <option name="name" value="maven3" />
+      <option name="url" value="file:/$PROJECT_DIR$/LPlugin/repo" />
+    </remote-repository>
   </component>
 </project>
