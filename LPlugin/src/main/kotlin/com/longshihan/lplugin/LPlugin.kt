@@ -30,7 +30,7 @@ public class LPlugin :Plugin<Project>{
                     Config.transformConfig(info)
                     println("时间插桩配置获取")
                 }
-                project.gradle.addListener(ArgusDependencyResolutionListener(project))
+//                project.gradle.addListener(ArgusDependencyResolutionListener(project))
                 android.registerTransform(LTransform(project))
             }
         }

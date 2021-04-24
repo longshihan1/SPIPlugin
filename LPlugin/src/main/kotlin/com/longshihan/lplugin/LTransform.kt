@@ -165,7 +165,7 @@ open class LTransform(val project: Project) : Transform() {
     fun checkPath(path: String): Boolean {
         if (path.endsWith(".class") && !path.contains("R$")
             && !path.endsWith("R.class") && !path.endsWith("BuildConfig.class")
-            && !path.contains("META-INF")
+            && !path.contains("META-INF")&&!path.startsWith("com.longshihan.collect")
         ) {
             return true
         }
