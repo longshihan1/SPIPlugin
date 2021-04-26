@@ -46,6 +46,7 @@ open class LTransform(val project: Project) : Transform() {
         super.transform(transformInvocation)
         if (!Config.enable) {
             println("时间插桩插件关闭")
+            return
         } else {
             println("时间插桩插件开启")
         }
@@ -163,13 +164,25 @@ open class LTransform(val project: Project) : Transform() {
     }
 
     fun checkPath(path: String): Boolean {
-        if (path.endsWith(".class") && !path.contains("R$")
-            && !path.endsWith("R.class") && !path.endsWith("BuildConfig.class")
-            && !path.contains("META-INF")&&!path.startsWith("com.longshihan.collect")
-        ) {
-            return true
+        if (!path.endsWith(".class")){
+            return false
         }
-        return false
+        for (content in Config.blackStartList){
+            if (path.startsWith(content)){
+                return false
+            }
+        }
+        for (content in Config.blackEndList){
+            if (path.endsWith(content)){
+                return false
+            }
+        }
+        for (content in Config.blackKeyList){
+            if (path.contains(content)){
+                return false
+            }
+        }
+        return true
     }
 
     fun transformPath(path: String, sequter: String): String {

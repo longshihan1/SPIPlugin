@@ -1,5 +1,6 @@
 package com.longshihan.lplugin
 
+import com.longshihan.lplugin.utils.Config
 import com.longshihan.lplugin.utils.UUIDUtils
 import org.objectweb.asm.AnnotationVisitor
 import org.objectweb.asm.ClassVisitor
@@ -20,9 +21,11 @@ class TestMethodClassAdapter (val owner:String,var classVisitor: ClassVisitor):C
         mv = object : AdviceAdapter(Opcodes.ASM5, mv, access, name, descriptor) {
             var uuidClassName:String?=null;
             override fun onMethodEnter() {
-                if (name=="<init>"){
-                    super.onMethodEnter()
-                    return
+                for (content in Config.blackMethodList){
+                    if (name==content){
+                        super.onMethodEnter()
+                        return
+                    }
                 }
                 uuidClassName=UUIDUtils.transformUUIDformClass(owner+name)
                 println("== onMethodEnter, owner = $owner, name = $name");
@@ -36,9 +39,11 @@ class TestMethodClassAdapter (val owner:String,var classVisitor: ClassVisitor):C
             }
 
             override fun onMethodExit(opcode: Int) {
-                if (name=="<init>"){
-                    super.onMethodExit(opcode)
-                    return
+                for (content in Config.blackMethodList){
+                    if (name==content){
+                        super.onMethodEnter()
+                        return
+                    }
                 }
                 mv.visitLdcInsn(owner)
                 mv.visitLdcInsn(name)
