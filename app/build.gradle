@@ -28,8 +28,11 @@ android {
     }
 }
 lConfig{
-    version="0.6"
+    version="0.9.3"
     enable=true
+    blackStartList=["androidx.annotation","androidx.core.animation.AnimatorKt",
+                    "com.google.auto.service.processor","org.checkerframework.checker.initialization"]
+    blackMethodList=["_\$_findCachedViewById","_\$_clearFindViewByIdCache"]
 }
 
 repositories {
@@ -50,7 +53,7 @@ dependencies {
     annotationProcessor 'com.google.auto.service:auto-service:1.0-rc6'
     implementation 'com.google.auto.service:auto-service:1.0-rc6'
 //    implementation 'com.github.longshihan1:spi_api:2.0.0'
-    implementation 'com.github.longshihan1:DataCollect:0.04'
+//    implementation 'com.github.longshihan1:DataCollect:0.04'
 //    implementation "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version"
 }
 

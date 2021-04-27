@@ -46,7 +46,6 @@ open class LTransform(val project: Project) : Transform() {
         super.transform(transformInvocation)
         if (!Config.enable) {
             println("时间插桩插件关闭")
-            return
         } else {
             println("时间插桩插件开启")
         }
@@ -67,10 +66,29 @@ open class LTransform(val project: Project) : Transform() {
             val outputProvider = transformInvocation?.outputProvider
             inputs?.stream()?.forEach { input ->
                 input.jarInputs.stream().forEach { jarInput ->
-                    traceJarFiles(jarInput, outputProvider)
+                    if (Config.enable) {
+                        traceJarFiles(jarInput, outputProvider)
+                    }else{
+                        val dest = outputProvider?.getContentLocation(
+                            jarInput.name,
+                            jarInput.contentTypes, jarInput.scopes, Format.JAR
+                        )
+                        FileUtils.copyFile(jarInput.file, dest)
+                    }
                 }
                 input.directoryInputs.stream().forEach { directoryInput ->
-                    traceFiles(directoryInput, outputProvider)
+                    if (Config.enable) {
+                        traceFiles(directoryInput, outputProvider)
+                    }else{
+                        val dest = outputProvider?.getContentLocation(
+                            directoryInput.name,
+                            directoryInput.contentTypes,
+                            directoryInput.scopes,
+                            Format.DIRECTORY
+                        )
+                        println("----directory is location  is  ${dest?.absolutePath}")
+                        FileUtils.copyDirectory(directoryInput.file, dest)
+                    }
                 }
             }
         } catch (e: Exception) {
