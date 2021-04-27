@@ -7,6 +7,7 @@ public class DApplication extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
+
         SaveData1.init(this);
     }
 }

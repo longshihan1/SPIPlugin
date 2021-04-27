@@ -67,7 +67,12 @@ open class LTransform(val project: Project) : Transform() {
             inputs?.stream()?.forEach { input ->
                 input.jarInputs.stream().forEach { jarInput ->
                     if (Config.enable) {
-                        traceJarFiles(jarInput, outputProvider)
+                        try {
+                            traceJarFiles(jarInput, outputProvider)
+                        }catch (e:Exception){
+                            println("jar:"+e.message)
+                        }
+
                     }else{
                         val dest = outputProvider?.getContentLocation(
                             jarInput.name,
@@ -78,7 +83,12 @@ open class LTransform(val project: Project) : Transform() {
                 }
                 input.directoryInputs.stream().forEach { directoryInput ->
                     if (Config.enable) {
-                        traceFiles(directoryInput, outputProvider)
+                        try {
+                            traceFiles(directoryInput, outputProvider)
+                         }catch (e:Exception){
+                    println("file:"+e.message)
+                }
+
                     }else{
                         val dest = outputProvider?.getContentLocation(
                             directoryInput.name,
@@ -205,7 +215,6 @@ open class LTransform(val project: Project) : Transform() {
 
     fun transformPath(path: String, sequter: String): String {
         val currentPath = path.replace(sequter, ".")
-        println(currentPath)
         return currentPath
     }
 
