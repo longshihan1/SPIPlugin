@@ -1,7 +1,5 @@
 package com.longshihan.lplugin.utils
 
-import com.longshihan.spi_api.LTransformListener
-import java.io.File
 import java.net.URL
 import java.nio.charset.StandardCharsets
 import java.util.*
@@ -9,9 +7,9 @@ import java.util.*
 /**
  * Created by longhe on 2020-07-16.
  */
-@Throws(ServiceConfigurationError::class)
-internal fun loadTransformers(classLoader: ClassLoader) =
-    newServiceLoader<LTransformListener>(classLoader).load()
+//@Throws(ServiceConfigurationError::class)
+//internal fun loadTransformers(classLoader: ClassLoader) =
+//    newServiceLoader<LTransformListener>(classLoader).load()
 
 internal inline fun <reified T> newServiceLoader(classLoader: ClassLoader) =
     ServiceLoaderFactory(classLoader, T::class.java).newServiceLoader()

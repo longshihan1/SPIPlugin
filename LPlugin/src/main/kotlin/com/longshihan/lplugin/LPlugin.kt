@@ -2,17 +2,12 @@ package com.longshihan.lplugin
 
 import com.android.build.gradle.AppExtension
 import com.android.build.gradle.AppPlugin
-import com.longshihan.lplugin.config.LConfig
 import com.longshihan.lplugin.config.LConfigInfo
-import com.longshihan.lplugin.dependencies.ArgusDependencyResolutionListener
 import com.longshihan.lplugin.utils.Config
 import com.longshihan.lplugin.utils.Config.USER_CONIFG
 import com.longshihan.lplugin.utils.getAndroid
-import com.longshihan.lplugin.utils.loadTransformers
-import com.longshihan.spi_api.LTransformListener
 import org.gradle.api.Plugin
 import org.gradle.api.Project
-import java.util.*
 
 
 /**

@@ -72,4 +72,8 @@ object SaveData {
             e.printStackTrace()
         }
     }
+
+    fun getSS(){
+        print("测试")
+    }
 }

@@ -30,8 +30,8 @@ lConfig{
     blackStartList=["androidx.annotation","androidx.core.animation.AnimatorKt",
                     "com.google.auto","org.checkerframework.checker",
                     "java.lang.invoke","com.squareup.javapoet",
-                    "com.android.builder","javax.lang.model"]
-    blackKeyList=["annotations","intellij","kotlin","androidx","Lambda"]
+                    "com.android.builder","javax.lang.model","com.google.gson"]
+    blackKeyList=["annotations","intellij"]
     blackMethodList=["_\$_findCachedViewById","_\$_clearFindViewByIdCache"]
 }
 

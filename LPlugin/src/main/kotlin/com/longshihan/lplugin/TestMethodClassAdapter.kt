@@ -28,7 +28,6 @@ class TestMethodClassAdapter (val owner:String,var classVisitor: ClassVisitor):C
                     }
                 }
                 uuidClassName=UUIDUtils.transformUUIDformClass(owner+name)
-                println("== onMethodEnter, owner = $owner, name = $name");
                 mv.visitLdcInsn(owner)
                 mv.visitLdcInsn(name)
                 mv.visitLdcInsn(uuidClassName)
