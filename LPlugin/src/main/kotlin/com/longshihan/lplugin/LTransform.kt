@@ -3,6 +3,7 @@ package com.longshihan.lplugin
 import com.android.build.api.transform.*
 import com.android.build.gradle.internal.pipeline.TransformManager
 import com.android.utils.FileUtils
+import com.longshihan.lplugin.utils.CommonUtil
 import com.longshihan.lplugin.utils.Config
 import org.apache.commons.codec.digest.DigestUtils
 import org.gradle.api.Project
@@ -228,7 +229,7 @@ open class LTransform(val project: Project) : Transform() {
                     jarOutputStream.write(tranformBtye(inputStream, entryName))
                 } else {
                     jarOutputStream.putNextEntry(zipEntry)
-                    jarOutputStream.write(inputStream.readBytes())
+                    jarOutputStream.write(CommonUtil.transformBytes(inputStream))
                 }
                 jarOutputStream.closeEntry()
             }
