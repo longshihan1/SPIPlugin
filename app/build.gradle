@@ -57,5 +57,7 @@ dependencies {
 //    implementation "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version"
     api 'com.android.support:multidex:1.0.3'
     api 'com.android.support:multidex-instrumentation:1.0.3'
+    implementation 'com.squareup.okhttp3:okhttp:3.10.0'
+    implementation 'com.blankj:utilcodex:1.30.6'
 }
 

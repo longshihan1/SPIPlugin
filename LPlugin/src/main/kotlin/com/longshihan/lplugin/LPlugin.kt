@@ -3,6 +3,7 @@ package com.longshihan.lplugin
 import com.android.build.gradle.AppExtension
 import com.android.build.gradle.AppPlugin
 import com.longshihan.lplugin.config.LConfigInfo
+import com.longshihan.lplugin.dependencies.ArgusDependencyResolutionListener
 import com.longshihan.lplugin.utils.Config
 import com.longshihan.lplugin.utils.Config.USER_CONIFG
 import com.longshihan.lplugin.utils.getAndroid
@@ -25,7 +26,7 @@ public class LPlugin :Plugin<Project>{
                     Config.transformConfig(info)
                     println("时间插桩配置获取")
                 }
-//                project.gradle.addListener(ArgusDependencyResolutionListener(project))
+                project.gradle.addListener(ArgusDependencyResolutionListener(project))
                 android.registerTransform(LTransform(project))
             }
         }
