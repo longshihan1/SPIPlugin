@@ -5,6 +5,8 @@ import com.android.build.gradle.internal.pipeline.TransformManager
 import com.android.utils.FileUtils
 import com.longshihan.lplugin.utils.CommonUtil
 import com.longshihan.lplugin.utils.Config
+import com.longshihan.lplugin.utils.ThreadPools
+import kotlinx.coroutines.runBlocking
 import org.apache.commons.codec.digest.DigestUtils
 import org.gradle.api.Project
 import org.objectweb.asm.ClassReader
@@ -46,10 +48,10 @@ open class LTransform(val project: Project) : Transform() {
         }
         try {
             println("===== ASM Transform =====")
-            println("${transformInvocation?.inputs}")
-            println("${transformInvocation?.referencedInputs}")
-            println("${transformInvocation?.outputProvider}")
-            println("${transformInvocation?.isIncremental}")
+//            println("${transformInvocation?.inputs}")
+//            println("${transformInvocation?.referencedInputs}")
+//            println("${transformInvocation?.outputProvider}")
+//            println("${transformInvocation?.isIncremental}")
             //当前是否是增量编译
             val isIncremental: Boolean? = transformInvocation?.isIncremental
             //消费型输入，可以从中获取jar包和class文件夹路径。需要输出给下一个任务
@@ -59,82 +61,121 @@ open class LTransform(val project: Project) : Transform() {
                 transformInvocation?.referencedInputs
             //OutputProvider管理输出路径，如果消费型输入为空，你会发现OutputProvider == null
             val outputProvider = transformInvocation?.outputProvider
+
             inputs?.stream()?.forEach { input ->
-                input.jarInputs.stream().forEach { jarInput ->
-                    var isOriginClass=false;
-                    if (Config.enable) {
-                        try {
-                            if (isIncremental!!) {
-                                val destFile = outputProvider?.getContentLocation(
-                                    jarInput.file.absolutePath,
-                                    jarInput.contentTypes, jarInput.scopes, Format.JAR
-                                )
-                                when (jarInput.status) {
-                                    Status.ADDED -> {//文件添加，需要对文件进行拷贝
-                                        println("jar add")
-                                        traceJarFiles(jarInput, outputProvider)
-                                    }
-                                    Status.CHANGED -> {//如果源jar文件状态是已经被修改了，那么目标jar文件要删掉,然后重新拷贝
-                                        println("jar change")
-                                        if (destFile!!.exists()) {
-                                            FileUtils.deletePath(destFile)
-                                        }
-                                        traceJarFiles(jarInput, outputProvider)
-                                    }
-                                    Status.NOTCHANGED -> {//文件状态没变化 不需要修改输出文件
-                                    }
-                                    Status.REMOVED -> {
-                                        println("jar remove")
-                                        if (destFile!!.exists()) {
-                                            FileUtils.deletePath(destFile)
-                                        }
-                                    }
-                                }
-                            } else {
-                                println("jar is operate")
-                                traceJarFiles(jarInput, outputProvider)
-                            }
-                        }catch (e:Exception){
-                            isOriginClass=true
-                            println("jar 报错："+e.message)
-                        }
-                    } else {
-                        isOriginClass=true;
-                    }
-                    if (isOriginClass){
-                        val dest = outputProvider?.getContentLocation(
-                            jarInput.name,
-                            jarInput.contentTypes, jarInput.scopes, Format.JAR
-                        )
-                        FileUtils.copyFile(jarInput.file, dest)
-                    }
+                input.jarInputs.stream().parallel().forEach { jarInput ->
+//                    ThreadPools.exec.execute{
+                        println("当前jar线程："+Thread.currentThread().name)
+                        transformJarInput(isIncremental, outputProvider, jarInput)
+//                    }
                 }
-                input.directoryInputs.stream().forEach { directoryInput ->
-                    var isOriginClass=false;
-                    if (Config.enable) {
-                        try {
-                            transformFiles(directoryInput, outputProvider, isIncremental!!)
-                        } catch (e: Exception) {
-                            isOriginClass=true
-                            println("file 报错:" + e.message)
-                        }
-                    } else {
-                        isOriginClass=true
-                    }
-                    if (isOriginClass){
-                        val dest = outputProvider?.getContentLocation(
-                            directoryInput.name,
-                            directoryInput.contentTypes,
-                            directoryInput.scopes,
-                            Format.DIRECTORY
-                        )
-                        println("----directory is location  is  ${dest?.absolutePath}")
-                        FileUtils.copyDirectory(directoryInput.file, dest)
-                    }
+                input.directoryInputs.stream().parallel().forEach { directoryInput ->
+//                    ThreadPools.exec.execute {
+//                    runBlocking {
+                        println("当前文件夹线程：" + Thread.currentThread().name)
+                        transformDirectoryInput(directoryInput, outputProvider, isIncremental)
+//                    }
+//                    }
                 }
             }
         } catch (e: Exception) {
             e.printStackTrace()
+        }
+    }
+
+    /**
+     * 处理文件夹
+     */
+    private fun transformDirectoryInput(
+        directoryInput: DirectoryInput,
+        outputProvider: TransformOutputProvider?,
+        isIncremental: Boolean?
+    ) {
+        var isOriginClass = false;
+        if (Config.enable) {
+            try {
+                transformFiles(directoryInput, outputProvider, isIncremental!!)
+            } catch (e: Exception) {
+                isOriginClass = true
+                println("file 报错:" + e.message)
+            }
+        } else {
+            isOriginClass = true
+        }
+        if (isOriginClass) {
+            val dest = outputProvider?.getContentLocation(
+                directoryInput.name,
+                directoryInput.contentTypes,
+                directoryInput.scopes,
+                Format.DIRECTORY
+            )
+            println("----directory is location  is  ${dest?.absolutePath}")
+            FileUtils.copyDirectory(directoryInput.file, dest)
+        }
+    }
+
+    /**
+     * 处理jar
+     */
+    private  fun transformJarInput(
+        isIncremental: Boolean?,
+        outputProvider: TransformOutputProvider?,
+        jarInput: JarInput
+    ) {
+        var isOriginClass = false;
+        if (Config.enable) {
+            try {
+                transformjar(isIncremental, outputProvider, jarInput)
+            } catch (e: Exception) {
+                isOriginClass = true
+                println("jar 报错：" + e.message)
+            }
+        } else {
+            isOriginClass = true;
+        }
+        if (isOriginClass) {
+            val dest = outputProvider?.getContentLocation(
+                jarInput.name,
+                jarInput.contentTypes, jarInput.scopes, Format.JAR
+            )
+            FileUtils.copyFile(jarInput.file, dest)
+        }
+    }
+
+    private fun transformjar(
+        isIncremental: Boolean?,
+        outputProvider: TransformOutputProvider?,
+        jarInput: JarInput
+    ) {
+        if (isIncremental!!) {
+            val destFile = outputProvider?.getContentLocation(
+                jarInput.file.absolutePath,
+                jarInput.contentTypes, jarInput.scopes, Format.JAR
+            )
+            when (jarInput.status) {
+                Status.ADDED -> {//文件添加，需要对文件进行拷贝
+                    println("jar add")
+                    traceJarFiles(jarInput, outputProvider)
+                }
+                Status.CHANGED -> {//如果源jar文件状态是已经被修改了，那么目标jar文件要删掉,然后重新拷贝
+                    println("jar change")
+                    if (destFile!!.exists()) {
+                        FileUtils.deletePath(destFile)
+                    }
+                    traceJarFiles(jarInput, outputProvider)
+                }
+                Status.NOTCHANGED -> {//文件状态没变化 不需要修改输出文件
+                }
+                Status.REMOVED -> {
+                    println("jar remove")
+                    if (destFile!!.exists()) {
+                        FileUtils.deletePath(destFile)
+                    }
+                }
+            }
+        } else {
+            println("jar is operate")
+            traceJarFiles(jarInput, outputProvider)
         }
     }
 
@@ -157,52 +198,49 @@ open class LTransform(val project: Project) : Transform() {
                     Status.NOTCHANGED->{}
                     Status.ADDED->{
                         println("file ADDED ")
-                        traceFiles(directoryInput,outputProvider)
+                        transformFile(it.key,directoryInput.file.absolutePath)
                     }
                     Status.CHANGED->{
                         println("file CHANGED ")
-                        traceFiles(directoryInput,outputProvider)
+                        transformFile(it.key,directoryInput.file.absolutePath)
                     }
                 }
             }
         }else{
             traceFiles(directoryInput,outputProvider)
         }
-    }
-    fun traceFiles(directoryInput: DirectoryInput, outputProvider: TransformOutputProvider?) {
-        val fileCPath = directoryInput.file.absolutePath
-
-        directoryInput.file.walk().forEach { file ->
-            val name = file.name
-            val dpath = file.absolutePath
-            var currentPath = dpath.replace(fileCPath + File.separator, "")
-            currentPath = transformPath(currentPath, "\\")
-            if (checkPath(currentPath) && file.isFile) {
-                try {
-                    println("$currentPath:is changeing ,,,,")
-                    val fileInputStream = FileInputStream(file)
-                    val code = tranformBtye(fileInputStream, currentPath)
-                    val fos = FileOutputStream(
-                        file.parentFile.absolutePath + File.separator + name
-                    )
-                    fos.write(code)
-                    fos.close()
-                } catch (e: Exception) {
-                    e.printStackTrace()
-                }
-            }
-        }
-        val dest = outputProvider?.getContentLocation(
-            directoryInput.name,
-            directoryInput.contentTypes,
-            directoryInput.scopes,
-            Format.DIRECTORY
-        )
         println("----directory is location  is  ${dest?.absolutePath}")
         FileUtils.copyDirectory(directoryInput.file, dest)
     }
+    fun traceFiles(directoryInput: DirectoryInput, outputProvider: TransformOutputProvider?) {
+        val fileCPath = directoryInput.file.absolutePath
+        directoryInput.file.walk().forEach { file ->
+            transformFile(file, fileCPath)
+        }
+    }
 
-    fun traceJarFiles(jarInput: JarInput, outputProvider: TransformOutputProvider?) {
+    private fun transformFile(file: File, fileCPath: String) {
+        val name = file.name
+        val dpath = file.absolutePath
+        var currentPath = dpath.replace(fileCPath + File.separator, "")
+        currentPath = transformPath(currentPath, "\\")
+        if (checkPath(currentPath) && file.isFile) {
+            try {
+                println("$currentPath:is changeing ,,,,")
+                val fileInputStream = FileInputStream(file)
+                val code = tranformBtye(fileInputStream, currentPath)
+                val fos = FileOutputStream(
+                    file.parentFile.absolutePath + File.separator + name
+                )
+                fos.write(code)
+                fos.close()
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
+    }
+
+   @Synchronized fun traceJarFiles(jarInput: JarInput, outputProvider: TransformOutputProvider?) {
         if (jarInput.file.absolutePath.endsWith(".jar")) {
             var jarName = jarInput.name
             val md5Name = DigestUtils.md5Hex(jarInput.file.absolutePath)

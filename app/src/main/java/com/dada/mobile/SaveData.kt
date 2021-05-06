@@ -76,4 +76,8 @@ object SaveData {
     fun getSS(){
         print("测试")
     }
+
+    fun getSS123(){
+        print("测试")
+    }
 }
