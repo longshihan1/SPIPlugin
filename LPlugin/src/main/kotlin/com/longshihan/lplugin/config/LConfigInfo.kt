@@ -14,5 +14,7 @@ open class LConfigInfo {
     var blackKeyList= mutableListOf<String>()
     //过滤非法方法
     var blackMethodList= mutableListOf<String>()
+    //白名单
+    var whitePackageList= mutableListOf<String>()
     //包过滤，文件过滤，白名单，黑名单
 }

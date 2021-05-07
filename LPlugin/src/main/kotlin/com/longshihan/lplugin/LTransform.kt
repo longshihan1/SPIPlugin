@@ -291,8 +291,25 @@ open class LTransform(val project: Project) : Transform() {
         return cw.toByteArray()
     }
 
+    /**
+     * 先过滤白名单，白名单内的放行，如果白名单没有配置，则默认放行
+     */
     fun checkPath(path: String): Boolean {
         if (!path.endsWith(".class")) {
+            return false
+        }
+        var exitWhitePackage=false
+        if (Config.whitePackageList.isEmpty()){
+            exitWhitePackage=true
+        }else {
+            for (content in Config.whitePackageList) {
+                if (path.startsWith(content)) {
+                    exitWhitePackage = true
+                    break
+                }
+            }
+        }
+        if (!exitWhitePackage){
             return false
         }
         for (content in Config.blackStartList) {
