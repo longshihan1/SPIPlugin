@@ -5,7 +5,7 @@ import com.longshihan.lplugin.config.LConfigInfo
 object Config {
 
     val USER_CONIFG="lConfig"
-    var dependencyVersion:String="0.6"
+    var dependencyVersion:String="0.9.4"
     var enable:Boolean=false
     var blackStartList= mutableSetOf<String>()
     var blackEndList= mutableSetOf<String>()
